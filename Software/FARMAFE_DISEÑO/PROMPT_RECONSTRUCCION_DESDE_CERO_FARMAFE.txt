@@ -1,0 +1,80 @@
+Actúa como arquitecto senior de software y desarrollador de aplicaciones de Investigación de Operaciones. Vamos a RECONSTRUIR desde una base limpia el software académico de FARMAFÉ dentro de `Proyecto_Grado/Software/`, utilizando PHP, MariaDB/MySQL de XAMPP, Tailwind CSS compilado localmente, JavaScript y CSS. La aplicación debe terminar siendo funcional, no una maqueta ni una página que muestre documentación del proyecto.
+
+OBJETIVO DEL PRODUCTO
+Construir una plataforma web en español para importar CSV/XLSX, validar y normalizar datos logísticos, gestionar catálogos/compras/recepciones/lotes/inventarios/pedidos/demanda, ejecutar una PLEM multiproducto y multiperiodo con dos prioridades lexicográficas, operar un horizonte móvil inicial de seis meses y comparar los planes guardados contra resultados observados posteriores.
+
+REGLA DE LECTURA OBLIGATORIA
+Antes de editar o generar código, lee por completo estos archivos ubicados bajo `Software/`:
+- `docs/diseno/00_LEEME_PRIMERO.md`
+- `docs/diseno/01_ESPECIFICACION_FUNCIONAL.md`
+- `docs/diseno/02_ARQUITECTURA_BASE_DATOS.md`
+- `docs/diseno/03_CONTRATO_MATEMATICO_PLEM.md`
+- `docs/diseno/04_BACKLOG_HISTORIAS_XP.md`
+- `docs/diseno/05_ARQUITECTURA_TECNICA_UI.md`
+- `PROMPT_RECONSTRUCCION_DESDE_CERO_FARMAFE.txt`
+
+Luego contrástalos con la fuente original en `Proyecto_Grado/`: `Proyecto de Grado Versiones/Perfil_FARMAFE_PLEM_V3.docx`, el Excel `Datos/Modelo_Datos_FARMAFE_Consolidado (1).xlsx`, los archivos originales de compras/ventas/inventarios, manual de funciones, misión/visión, instrumentos y bibliografía. No declares leída una fuente que no abriste. Registra fuentes inaccesibles e incertidumbres. Los archivos originales se conservan intactos.
+
+RECONSTRUCCIÓN CONTROLADA, NO BORRADO
+El usuario solicita una implementación nueva, pero no autoriza destruir el trabajo ni las bases anteriores. Antes de reconstruir, crea una copia de seguridad de la implementación anterior dentro de un directorio privado no público como `Software/_archive/legacy_2026-10-29/`, excluyendo `.env`, contraseñas, logs reales y archivos personales. No hagas `DROP DATABASE`, `DROP TABLE` destructivo ni sobrescribas la base `farmafe_db`. La nueva instalación debe usar una base separada `farmafe_app`, con script SQL importable en phpMyAdmin. Mantén el archivo `.env` existente fuera de cambios automáticos; prepara `.env.example` y documenta cómo configurar el nombre nuevo de base.
+
+FUENTES Y DATOS
+El workbook registra 195 medicamentos como catálogo de referencia, tres proveedores de prototipo y 287 pares válidos producto-proveedor. El conteo de 848 lotes mezcla observados con respaldo simulado; no lo declares como 848 lotes reales. El libro indica ventas observadas en granularidad anual, facturas con fecha/cliente/importe y varias variables de demanda mensual, lead time, capacidad, ubicación y costos marcadas como simuladas/escenario. Por tanto:
+- No crear pedidos históricos ficticios a partir de ventas agregadas.
+- No repartir ventas anuales por meses y presentarlo como demanda mensual observada.
+- Con detalle de pedido, medir atención de pedido según campos disponibles; con demanda agregada, calcular atención agregada y no fingir un porcentaje histórico de pedidos completos/a tiempo.
+- Etiquetar `OBSERVADO`, `DERIVADO`, `SIMULADO`, `SUPUESTO` o `PENDIENTE_VALIDACION`.
+- El cliente se anonimiza con los códigos previstos por el proyecto cuando corresponda.
+- Los registros sanitarios `PEND-*` no están verificados oficialmente; la cadena de frío `NO_IDENTIFICADO` no se debe inferir.
+
+REQUISITOS TECNOLÓGICOS
+- PHP con MVC ligero y separación Controllers, Services, Repositories, Models, Views, validación y middleware.
+- MariaDB sobre XAMPP; usar PDO y parámetros preparados.
+- Tailwind CSS con compilación local sin CDN y recursos CSS/JS locales. Diagnostica Node/npm; si no están, utiliza un CLI standalone compatible o CSS previamente compilado de manera documentada.
+- Colores de marca azul y amarillo: azul oscuro `#12315B`, azul primario `#1D4ED8`, amarillo `#F2C94C`, fondos claros y texto con contraste. Amarillo como acento, no texto pequeño sobre fondo blanco.
+- Nada de emojis en UI, código, comentarios, mensajes, datos de ejemplo ni documentación de software. Usar SVG/iconos locales no emoji.
+- Landing page pública real, elegante y responsive. Dashboard separado tras login. NO mostrar al usuario etapas XP, versiones del runtime, nombres de prompts o lista de carpetas como contenido principal del software.
+- Mensajes claros, no acusatorios, que indiquen campo/fila/razón y solución. Diferenciar error de usuario/dato, permiso, infactibilidad, timeout y error interno; nunca culpar al usuario automáticamente.
+- No crear botones o links que no funcionen. Las acciones destructivas requieren confirmación, permiso y registro de auditoría.
+- No usar credenciales comunes de administrador. Crear ADMIN con wizard de primer uso o comando CLI local, password_hash y cierre del asistente tras el primer uso.
+- No exponer `.env`, uploads, logs, back-ups, migraciones o artefactos LP/MPS bajo webroot.
+- Verificar versiones reales PHP/MariaDB, extensiones y avisos oficiales; no sustituir componentes XAMPP ni actualizar automáticamente sin autorización.
+
+ARQUITECTURA DE DATOS
+Implementa y documenta el esquema completo conforme a `02_ARQUITECTURA_BASE_DATOS.md`: seguridad/roles; importaciones, mapeos, staging, errores y procedencia; medicamentos, proveedores y pares válidos, clientes anonimizados y ubicaciones; órdenes de compra, detalles, recepciones y detalles; lotes, ubicaciones, movimientos y snapshots verificables; pedidos/detalles/atenciones/despachos; demanda periódica; presupuestos/costos de escenarios; escenarios, pronósticos, parámetros, ejecuciones PLEM, snapshots, compras proyectadas, inventario proyectado, asignaciones, resultados de demanda, diagnósticos y comparaciones plan-realidad; migraciones. Crear `database/sql/00_schema_fresh.sql` importable en phpMyAdmin, sin instrucciones destructivas y compatible con MariaDB del entorno detectado. Los valores iniciales deben limitarse a roles/catalogo de referencia no sensibles y escenarios explícitos; no cargar simulaciones como si fueran historia real.
+
+MODELO MATEMÁTICO OBLIGATORIO
+Implementa las variables y ecuaciones del perfil V3, apartado 6.16, y de la hoja `PLEM_config`, no un cálculo heurístico presentado como PLEM. Utiliza `03_CONTRATO_MATEMATICO_PLEM.md` y contrasta con `docs/MODELO_PLEM.md`, `PLEM_tamano` y `Horizonte_movil`. Debes incluir:
+- Conjuntos de medicamentos `i`, proveedores `s`, pares válidos `PP`, periodos `t`, lotes `l` y líneas/pedidos `c` solo si su detalle existe.
+- `x_ist` compra entera; `z_ist` binaria de activación; `I_ilt` inventario por lote; `a_ict` atención con definición coherente; `p_ict` pendiente; `q_ict` demanda perdida; `W_ilt` baja por vencimiento; variable de asignación por lote vinculada al balance.
+- Objetivo lexicográfico: Etapa 1 maximizar nivel de servicio ponderado; guardar `S*`. Etapa 2 minimizar costo logístico sujeto a conservar `S*`. Ningún resultado óptimo sin estado óptimo verificado por el solver.
+- Restricciones de balance de inventario, conservación de demanda, presupuesto `B_t`, capacidad `CAP_z` solo cuando es medible, lead time/recepción, activación/MOQ/pack, lote/vigencia/FEFO, decisiones comprometidas congeladas y dominios enteros/binarios.
+- Resolver/documentar diferencias entre la fórmula textual `Σ w·a/d`, la ficha `PLEM_config` que resume `Σw·a`, y la indexación de demanda/pendientes. Normalizar pesos y evitar división entre cero y que atención de backorders haga el servicio mayor que uno. No alteres en silencio las ecuaciones: registra la corrección matemática y su motivo en `docs/DECISIONES_TECNICAS.md`.
+- Utilizar solver MIP real (HiGHS, CBC o GLPK sujeto a compatibilidad verificada) detrás de `PlemAdapterInterface`. Si no está instalado/no es compatible, reportar el bloqueo y no fabricar resultados. Exportaciones de solver y temporales fuera del webroot.
+- Crear primero un caso pequeño comprobado manualmente; después dimensionar el caso con 195 medicamentos, 287 pares válidos y seis periodos. No asumir los 848 lotes como todos reales. Dimensionar variables por conjuntos realmente presentes.
+
+HORIZONTE MÓVIL OBLIGATORIO
+Horizonte inicial de seis periodos mensuales. Cada ejecución guarda snapshot de datos, fecha de corte, parámetros, formulación y resultado. Al avanzar el periodo, importar los hechos nuevos, actualizar saldos y crear una nueva ejecución. Órdenes de compra emitidas/comprometidas y pedidos confirmados se mantienen fijos cuando están documentados; compras propuestas aún abiertas se pueden recalcular. Las ejecuciones anteriores nunca se sobrescriben. Debe existir prueba que demuestre que un cambio de demanda/saldo afecta una nueva corrida, mientras una orden comprometida permanece fija.
+
+EVALUACIÓN
+Implementa comparación plan-realidad y As-Is/To-Be bajo condiciones equivalentes. El backtesting no podrá usar información posterior al corte de decisión. Diferenciar verificación matemática, resultado contrafactual y mejora operativa observada. Si no hay líneas/fechas de pedido, mostrar indicador no calculable en vez de inventar. Costos simulados se etiquetan como escenario.
+
+DISEÑO XP E HISTORIAS
+Sigue el orden de `04_BACKLOG_HISTORIAS_XP.md` y sus criterios de aceptación. La secuencia es una guía de orden, no un permiso para detenerse en documentación: implementa código, prueba y entrega avance ejecutable. Trabaja en iteraciones verticales: landing/login, importación, maestros, inventario/compras, demanda/pedidos, escenarios, PLEM, horizonte móvil, comparación/reportes y QA. No intentes escribir todo sin probar.
+
+ENTREGABLES Y CRITERIOS DE ESTA PRIMERA EJECUCIÓN
+1. Crear `Software/docs/diseno/` y copiar allí estos documentos de diseño si todavía no están, sin duplicar si ya coinciden.
+2. Generar una especificación de schema completa y `database/sql/00_schema_fresh.sql` que el usuario pueda importar en phpMyAdmin sin destruir la base anterior.
+3. Implementar la base nueva de aplicación: layout, landing page real, login seguro básico, navegación, protección de rutas, conexión PDO a `farmafe_app` y dashboard basado en consultas reales (vacío correctamente si no hay datos). No usar KPI hardcodeados.
+4. Crear formularios/vistas funcionales para importación con staging, preview, mapeo, validación, confirmación e historial. CSV primero y XLSX usando librería/lector local validado; si la lectura XLSX no está disponible, declararlo y no simular soporte.
+5. Crear primeras pantallas de catálogo y listados conectados a MariaDB; no fingir que CRUD funciona si faltan endpoints o vistas.
+6. Crear primera implementación real del PLEM como servicio desacoplado y pruebas de caso pequeño. Si solver no está operativo, seguir desarrollando lo independiente y dejar la integración claramente bloqueada, no simularla.
+7. Mantener README instalable en Windows/XAMPP, instrucciones SQL, .env.example sin secretos, tests y `CONTINUIDAD_IA.md` actualizado.
+8. Ejecutar tests que estén disponibles y reportar el comando exacto/resultados reales. No afirmar test pass sin ejecución.
+9. Documentar qué quedó realizado, qué está incompleto y el siguiente bloque de trabajo.
+
+RESTRICCIONES FUERA DE ALCANCE
+No implementar contabilidad integral, conciliación contable automática, importación directa, trámites aduaneros, diseño/optimización de rutas, GPS/seguimiento de flotas ni validación CFR-21 Part 11. No presentar el sistema como producto regulatoriamente validado.
+
+EMPIEZA AHORA
+Inspecciona el estado actual y respalda lo necesario. Luego ejecuta la reconstrucción incremental con el esquema nuevo `farmafe_app` y el SQL importable. No respondas únicamente con un plan o recomendaciones; crea y prueba archivos reales en `Software/`. No esperes confirmación para las acciones no destructivas. Antes de cualquier operación destructiva, detente y pide autorización. Al final informa los archivos, pruebas ejecutadas, bloqueos y cómo abrir el prototipo localmente.

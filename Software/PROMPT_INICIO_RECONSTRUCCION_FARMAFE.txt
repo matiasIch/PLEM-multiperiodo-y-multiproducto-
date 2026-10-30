@@ -1,0 +1,7 @@
+Lee primero `PROMPT_RECONSTRUCCION_DESDE_CERO_FARMAFE.txt` y todos los documentos `00_LEEME_PRIMERO.md` a `05_ARQUITECTURA_TECNICA_UI.md` de la carpeta del paquete. Si todavía no están en `Software/docs/diseno/`, cópialos allí sin duplicar.
+
+El usuario ha decidido reconstruir la aplicación FARMAFÉ desde una base limpia, pero sin destruir el código previo ni la base de datos anterior. Abre el workspace `Proyecto_Grado/`, deja intactas las carpetas originales y trabaja solo dentro de `Software/`.
+
+Comienza realizando una inspección real y una copia de seguridad segura del código anterior. Después implementa un avance ejecutable amplio, no una pantalla con explicaciones del proyecto: landing page pública azul/amarilla, base de datos nueva `farmafe_app` con SQL importable, login sin contraseñas predeterminadas, navegación privada, centro de importación CSV/XLSX con staging y primeras vistas conectadas a MariaDB. Inicia también la integración real de la PLEM conforme a las variables y ecuaciones del contrato matemático. Si hay conflictos matemáticos o el solver no puede ejecutarse, documéntalos y no inventes resultados.
+
+No uses emojis en ninguna parte del software. Usa PHP, MariaDB, Tailwind compilado localmente, CSS y JS local. No pongas en la landing los estados de las etapas XP o datos hardcodeados. No declares funcional un módulo hasta ejecutar sus pruebas. No hagas operaciones destructivas ni borres bases existentes. Al terminar, entrega el estado de ejecución y el siguiente bloque de trabajo.
